@@ -1,33 +1,21 @@
 (function () {
-  // === CONFIGURATION LOADER ===
   const cfg = window.MyBotConfig || {};
-  const clientId   = cfg.clientId   || "default";
-  const avatarUrl  = cfg.avatar     || "";
-  const botName    = cfg.botName    || "AVA";
-  const botImage   = cfg.botImage   || avatarUrl;
-  const greeting   = cfg.greeting   || null;
-  const apiBase    = (cfg.api || "").replace(/\/+$/, "");
-  const theme      = cfg.theme || {};
-
+  const clientId = cfg.clientId || "default";
+  const avatarUrl = cfg.avatar || "";
+  const botName = cfg.botName || "AVA";
+  const botImage = cfg.botImage || avatarUrl;
+  const greeting = cfg.greeting || "Hi! How can I help you today?";
+  const apiBase = (cfg.api || "").replace(/\/+$/, "");
+  const theme = cfg.theme || {};
   const background = theme.background || "#ffffff";
-  const textColor  = theme.text       || "#1a1a1a";
-  const primary    = theme.primary    || "#2b2b2b";
-  const userMsgBg  = theme.userMsgBg  || primary;
-  const botMsgBg   = theme.botMsgBg   || "#e6e6e6";
+  const textColor = theme.text || "#222222";
+  const primary = theme.primary || "#4a90e2";
+  const userMsgBg = theme.userMsgBg || primary;
+  const botMsgBg = theme.botMsgBg || "#e0e0e0";
 
-  // === STYLE INJECTION ===
+  // Inject styles
   const style = document.createElement("style");
   style.textContent = `
-    @keyframes breathing {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    @keyframes blink {
-      0% { opacity: 0.2; }
-      20% { opacity: 1; }
-      100% { opacity: 0.2; }
-    }
     .bb-avatar {
   position: fixed;
   bottom: 20px;
@@ -166,18 +154,17 @@
   `;
   document.head.appendChild(style);
 
-  // === AVATAR ===
+  // Avatar button
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
-  const notifDot = document.createElement("div");
-  notifDot.className = "bb-notif";
-  avatar.appendChild(notifDot);
   document.body.appendChild(avatar);
 
-  // === CHAT CONTAINER ===
+
+  // Chat container
   const chat = document.createElement("div");
   chat.className = "bb-chat";
 
+  // Header
   const header = document.createElement("div");
   header.className = "bb-chat-header";
   const headerImg = document.createElement("img");
@@ -186,36 +173,31 @@
   headerTitle.textContent = botName;
   const headerClose = document.createElement("button");
   headerClose.innerHTML = "×";
-  headerClose.onclick = () => (chat.style.display = "none");
+  headerClose.onclick = () => chat.style.display = "none";
   header.appendChild(headerImg);
   header.appendChild(headerTitle);
   header.appendChild(headerClose);
 
+  // Messages area
   const messages = document.createElement("div");
   messages.className = "bb-messages";
 
+  // Input bar
   const inputBar = document.createElement("div");
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Ask AVA...";
+  input.placeholder = "Type your message...";
   const sendBtn = document.createElement("button");
-  sendBtn.className = "ask";
-  sendBtn.textContent = "Ask";
-  const micBtn = document.createElement("button");
-  micBtn.className = "mic";
-  micBtn.innerHTML = "🎤";
-
+  sendBtn.textContent = "Send";
   inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
-  inputBar.appendChild(micBtn);
 
   chat.appendChild(header);
   chat.appendChild(messages);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
-  // === MESSAGE HANDLER ===
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -225,7 +207,6 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
-
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -235,12 +216,10 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
-
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
   }
-
 
   // Typing indicator helpers
   let typingEl = null;
