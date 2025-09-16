@@ -1,5 +1,4 @@
 (function () {
-
   // === CONFIGURATION LOADER ===
   const cfg = window.MyBotConfig || {};
   const clientId   = cfg.clientId   || "default";
@@ -30,7 +29,7 @@
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 99999;
+      z-index: 2147483647; /* ensure on top */
     }
     .bb-notif {
       position: absolute;
@@ -55,7 +54,7 @@
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      z-index: 99999;
+      z-index: 2147483647;
       overflow: hidden;
       font-family: sans-serif;
     }
@@ -69,7 +68,9 @@
     .bb-chat-header img { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; }
     .bb-chat-header span { flex: 1; font-weight: bold; }
     .bb-chat-header button { background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+
     .bb-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+
     .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
     .bb-inputbar input { flex: 1; border: none; padding: 10px; }
     .bb-inputbar button { border: none; cursor: pointer; }
@@ -86,6 +87,7 @@
       border-radius: 4px;
       font-size: 16px;
     }
+
     .bb-typing {
       display: inline-block;
       background: ${botMsgBg};
@@ -139,7 +141,7 @@
   headerTitle.textContent = botName;
   const headerClose = document.createElement("button");
   headerClose.innerHTML = "×";
-  headerClose.onclick = () => chat.style.display = "none";
+  headerClose.onclick = () => (chat.style.display = "none");
   header.appendChild(headerImg);
   header.appendChild(headerTitle);
   header.appendChild(headerClose);
@@ -178,6 +180,7 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
+
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -187,6 +190,7 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
+
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
@@ -203,7 +207,10 @@
     messages.scrollTop = messages.scrollHeight;
   }
   function hideTyping() {
-    if (typingEl) { typingEl.remove(); typingEl = null; }
+    if (typingEl) {
+      typingEl.remove();
+      typingEl = null;
+    }
   }
 
   // === BOT COMMUNICATION ===
@@ -223,7 +230,7 @@
         return;
       }
       const data = await res.json();
-      let botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
       addMsg(botReply);
     } catch {
       hideTyping();
@@ -233,4 +240,25 @@
 
   // === EVENT LISTENERS ===
   function openChat() {
-    chat
+    chat.style.display = "flex";
+    if (notifDot && notifDot.parentNode) notifDot.remove();
+    if (greeting && messages.childElementCount === 0) {
+      addMsg(greeting, "bot");
+    }
+  }
+
+  avatar.onclick = () => openChat();
+
+  sendBtn.onclick = () => {
+    const msg = input.value.trim();
+    if (msg) sendToBot(msg);
+  };
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
+  micBtn.onclick = () => {
+    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
+  };
+})(); // close IIFE
