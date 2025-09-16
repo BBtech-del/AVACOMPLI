@@ -3,7 +3,7 @@
   const cfg = window.MyBotConfig || {};
   const clientId   = cfg.clientId   || "default";
   const avatarUrl  = cfg.avatar     || "";
-  const botName    = cfg.botName    || "Chatbot";
+  const botName    = cfg.botName    || "AVA";
   const botImage   = cfg.botImage   || avatarUrl;
   const greeting   = cfg.greeting   || null;
   const apiBase    = (cfg.api || "").replace(/\/+$/, "");
