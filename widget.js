@@ -102,29 +102,30 @@
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
-  /* === MOBILE FIXES === */
-@media (max-width: 600px) {
-  .bb-avatar {
-    width: 80px;   /* shrink for small screens */
-    height: 80px;
-    bottom: 15px;
-    right: 15px;
-    background-color: #f0f0f0; /* fallback so transparent PNG is visible */
-    display: block !important;
-    visibility: visible !important;
-    position: fixed !important;
-    z-index: 2147483647 !important;
-  }
+    /* === MOBILE FIXES === */
+    @media (max-width: 600px) {
+      .bb-avatar {
+        width: 80px;
+        height: 80px;
+        bottom: 15px;
+        right: 15px;
+        background-color: #f0f0f0;
+        display: block !important;
+        visibility: visible !important;
+        position: fixed !important;
+        z-index: 2147483647 !important;
+      }
 
-  .bb-chat {
-    width: 95%;
-    left: 2.5%;
-    right: auto;
-    height: 70%;
-    bottom: 110px; /* lifted above avatar */
-    position: fixed !important;
-  }
-}
+      .bb-chat {
+        width: 95%;
+        left: 2.5%;
+        right: auto;
+        max-height: calc(100vh - 140px); /* always fits above avatar */
+        height: auto;
+        bottom: 110px;
+        position: fixed !important;
+      }
+    }
   `;
   document.head.appendChild(style);
 
