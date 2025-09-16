@@ -299,21 +299,25 @@ inputBar.appendChild(input);
     }
   }
 
+  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (messages.childElementCount === 0) addMsg(greeting);
+    if (notifDot && notifDot.parentNode) notifDot.remove();
+    if (greeting && messages.childElementCount === 0) {
+      addMsg(greeting, "bot");
+    }
   }
 
-  avatar.onclick = () => {
-    openChat();
-    bubble?.remove?.();
-  };
+  avatar.onclick = () => openChat();
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-  input.addEventListener("keydown", e => {
+
+  input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendBtn.click();
   });
-})();
+
+  micBtn.onclick = () => {
+
