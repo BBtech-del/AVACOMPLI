@@ -1,19 +1,21 @@
 (function () {
+  // === CONFIGURATION LOADER ===
   const cfg = window.MyBotConfig || {};
-  const clientId  = cfg.clientId || "default";
-  const avatarUrl = cfg.avatar || "";
-  const botName   = cfg.botName || "AVA";  // new bot name
-  const botImage  = cfg.botImage || avatarUrl;
-  const apiBase   = (cfg.api || "").replace(/\/+$/, ""); // new API base
-  const theme     = cfg.theme || {};
+  const clientId   = cfg.clientId   || "default";
+  const avatarUrl  = cfg.avatar     || "";
+  const botName    = cfg.botName    || "AVA";
+  const botImage   = cfg.botImage   || avatarUrl;
+  const greeting   = cfg.greeting   || null;
+  const apiBase    = (cfg.api || "").replace(/\/+$/, "");
+  const theme      = cfg.theme || {};
 
   const background = theme.background || "#ffffff";
-  const textColor  = theme.text       || "#222222";
-  const primary    = theme.primary    || "#4a90e2";
+  const textColor  = theme.text       || "#1a1a1a";
+  const primary    = theme.primary    || "#2b2b2b";
   const userMsgBg  = theme.userMsgBg  || primary;
-  const botMsgBg   = theme.botMsgBg   || "#e0e0e0";
+  const botMsgBg   = theme.botMsgBg   || "#e6e6e6";
 
-  // Inject styles
+  // === STYLE INJECTION ===
   const style = document.createElement("style");
   style.textContent = `
     @keyframes breathing {
@@ -27,23 +29,25 @@
       100% { opacity: 0.2; }
     }
     .bb-avatar {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: url(${avatarUrl}) center/cover no-repeat;
-      cursor: pointer;
-      z-index: 9999;
-      animation: breathing 3s ease-in-out infinite;
-      background-color: rgba(255, 255, 255, 0.12);
-      box-shadow:
-        inset 0 0 8px rgba(255, 255, 255, 0.5),
-        0 4px 12px rgba(0, 0, 0, 0.25),
-        0 0 18px rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(4px);
-    }
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: url(${avatarUrl}) center/cover no-repeat;
+  cursor: pointer;
+  z-index: 9999;
+  animation: breathing 3s ease-in-out infinite;
+  * Bubble effect */
+  background-color: rgba(255, 255, 255, 0.12); /* subtle transparent fill */
+  box-shadow:
+    inset 0 0 8px rgba(255, 255, 255, 0.5), /* inner glow */
+    0 4px 12px rgba(0, 0, 0, 0.25),         /* drop shadow */
+    0 0 18px rgba(255, 255, 255, 0.25);     /* soft outer glow */
+  backdrop-filter: blur(4px);               /* glass effect */
+}
+
     .bb-chat {
       position: fixed;
       bottom: 130px;
@@ -109,23 +113,29 @@
       cursor: pointer;
     }
     .bb-bubble {
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      background: ${primary};
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 16px;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 9999;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    @media (max-width: 600px) {
-      .bb-bubble { bottom: 85px; }
-    }
+  position: fixed;
+  bottom: 90px; /* desktop/tablet default */
+  right: 20px;
+  background: ${primary};
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 9999;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Mobile adjustment */
+@media (max-width: 600px) {
+  .bb-bubble {
+    bottom: 85px; /* lower for mobile */
+  }
+}
+
+
     .bb-bubble button {
       background: transparent;
       border: none;
@@ -144,27 +154,49 @@
       align-self: flex-start;
       font-style: italic;
     }
-    .bb-typing span { animation: blink 1.4s infinite both; }
-    .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
-    .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
+    .bb-typing span {
+      animation: blink 1.4s infinite both;
+    }
+    .bb-typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .bb-typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
   `;
   document.head.appendChild(style);
 
-  // Avatar button
+  // === AVATAR ===
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
-  document.body.appendChild(avatar);
+  const notifDot = document.createElement("div");
+  notifDot.className = "bb-notif";
+  avatar.appendChild(notifDot);
+  document.body.appendChild(avatar)
 
-  // Info bubble
-  const langBubble = document.createElement("div");
-  langBubble.className = "bb-bubble";
-  langBubble.innerHTML = `Hi 👋 I'm fluent in 100+ languages <button aria-label="Close">×</button>`;
-  langBubble.querySelector("button").onclick = () => langBubble.remove();
-  document.body.appendChild(langBubble);
 
   // Chat container
   const chat = document.createElement("div");
   chat.className = "bb-chat";
+  const inputBar = document.createElement("div");
+  inputBar.className = "bb-inputbar";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Ask AVA...";
+  const sendBtn = document.createElement("button");
+  sendBtn.className = "ask";
+  sendBtn.textContent = "Ask";
+  const micBtn = document.createElement("button");
+  micBtn.className = "mic";
+  micBtn.innerHTML = "🎤";
+inputBar.appendChild(input);
+  inputBar.appendChild(sendBtn);
+  inputBar.appendChild(micBtn);
+
+  chat.appendChild(header);
+  chat.appendChild(messages);
+  chat.appendChild(inputBar);
+  document.body.appendChild(chat);
 
   // Header
   const header = document.createElement("div");
@@ -200,7 +232,6 @@
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
-  // Add message helper
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -224,7 +255,7 @@
     return msg;
   }
 
-  // Typing indicator
+  // Typing indicator helpers
   let typingEl = null;
   function showTyping() {
     hideTyping();
@@ -241,7 +272,6 @@
     }
   }
 
-  // === BOT COMMUNICATION ===
   async function sendToBot(message) {
     addMsg(message, "user");
     input.value = "";
@@ -258,7 +288,10 @@
         return;
       }
       const data = await res.json();
-      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      let botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      if (botReply.trim().toLowerCase() === "i don't know") {
+        botReply = "I’m sorry, I don’t have that information right now. Could you try rephrasing your question?";
+      }
       addMsg(botReply);
     } catch {
       hideTyping();
@@ -266,27 +299,21 @@
     }
   }
 
-  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (notifDot && notifDot.parentNode) notifDot.remove();
-    if (greeting && messages.childElementCount === 0) {
-      addMsg(greeting, "bot");
-    }
+    if (messages.childElementCount === 0) addMsg(greeting);
   }
 
-  avatar.onclick = () => openChat();
+  avatar.onclick = () => {
+    openChat();
+    bubble?.remove?.();
+  };
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", e => {
     if (e.key === "Enter") sendBtn.click();
   });
-
-  micBtn.onclick = () => {
-    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
-  };
-})(); // close IIFE
+})();
