@@ -29,7 +29,7 @@
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 99999;
+      z-index: 2147483647; /* max z-index */
     }
     .bb-notif {
       position: absolute;
@@ -45,7 +45,7 @@
     .bb-chat {
       position: fixed;
       bottom: 20px;
-      right: 20px; /* flush right */
+      right: 20px;
       width: 360px;
       height: 500px;
       background: ${background};
@@ -54,7 +54,7 @@
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      z-index: 99999;
+      z-index: 2147483647;
       overflow: hidden;
       font-family: sans-serif;
     }
@@ -71,8 +71,20 @@
     .bb-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
     .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
     .bb-inputbar input { flex: 1; border: none; padding: 10px; }
-    .bb-inputbar button { background: ${primary}; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
-    .bb-inputbar button.mic { margin-left: 4px; }
+    .bb-inputbar button { border: none; cursor: pointer; }
+    .bb-inputbar button.ask {
+      background: ${primary};
+      color: #fff;
+      padding: 10px 15px;
+    }
+    .bb-inputbar button.mic {
+      background: #1abc9c; /* teal */
+      color: #fff;
+      padding: 10px;
+      margin-left: 4px;
+      border-radius: 4px;
+      font-size: 16px;
+    }
     .bb-typing {
       display: inline-block;
       background: ${botMsgBg};
@@ -86,6 +98,11 @@
     .bb-typing span { animation: blink 1.4s infinite both; }
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @media (max-width: 600px) {
+      .bb-avatar { width: 80px; height: 80px; bottom: 10px; right: 10px; }
+      .bb-chat { width: 95%; right: 2.5%; height: 70%; }
+    }
   `;
   document.head.appendChild(style);
 
@@ -123,6 +140,7 @@
   input.type = "text";
   input.placeholder = "Ask AVA...";
   const sendBtn = document.createElement("button");
+  sendBtn.className = "ask";
   sendBtn.textContent = "Ask";
   const micBtn = document.createElement("button");
   micBtn.className = "mic";
@@ -196,30 +214,4 @@
       addMsg(botReply);
     } catch {
       hideTyping();
-      addMsg("I had trouble replying just now.");
-    }
-  }
-
-  // === EVENT LISTENERS ===
-  function openChat() {
-    chat.style.display = "flex";
-    notifDot.remove();
-    if (greeting && messages.childElementCount === 0) {
-      addMsg(greeting, "bot");
-    }
-  }
-
-  avatar.onclick = () => openChat();
-  sendBtn.onclick = () => {
-    const msg = input.value.trim();
-    if (msg) sendToBot(msg);
-  };
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendBtn.click();
-  });
-
-  micBtn.onclick = () => {
-    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
-  };
-
-})(); // close IIFE
+      addMsg("I had trouble replying just
