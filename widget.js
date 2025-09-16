@@ -104,20 +104,23 @@
 
     /* === MOBILE FIXES === */
     @media (max-width: 600px) {
-      .bb-avatar {
-        width: 80px;
-        height: 80px;
-        bottom: 10px;
-        right: 10px;
-      }
-      .bb-chat {
-        width: 95%;
-        left: 2.5%;
-        right: 2.5%;
-        height: 70%;
-        bottom: 100px; /* lift above avatar */
-      }
-    }
+  .bb-avatar {
+    width: 120px;
+    height: 120px;
+    bottom: 10px;
+    right: 10px;
+    background-color: #f0f0f0;
+    display: block !important;
+    visibility: visible !important;
+  }
+  .bb-chat {
+    width: 95%;
+    left: 2.5%;
+    right: 2.5%;
+    height: 70%;
+    bottom: 140px;
+  }
+}
   `;
   document.head.appendChild(style);
 
