@@ -1,17 +1,17 @@
 (function () {
   const cfg = window.MyBotConfig || {};
-  const clientId = cfg.clientId || "default";
+  const clientId  = cfg.clientId || "default";
   const avatarUrl = cfg.avatar || "";
-  const botName = cfg.botName || "Chatbot";
-  const botImage = cfg.botImage || avatarUrl;
-  const greeting = cfg.greeting || "Hi! How can I help you today?";
-  const apiBase = (cfg.api || "").replace(/\/+$/, "");
-  const theme = cfg.theme || {};
+  const botName   = cfg.botName || "AVA";  // new bot name
+  const botImage  = cfg.botImage || avatarUrl;
+  const apiBase   = (cfg.api || "").replace(/\/+$/, ""); // new API base
+  const theme     = cfg.theme || {};
+
   const background = theme.background || "#ffffff";
-  const textColor = theme.text || "#222222";
-  const primary = theme.primary || "#4a90e2";
-  const userMsgBg = theme.userMsgBg || primary;
-  const botMsgBg = theme.botMsgBg || "#e0e0e0";
+  const textColor  = theme.text       || "#222222";
+  const primary    = theme.primary    || "#4a90e2";
+  const userMsgBg  = theme.userMsgBg  || primary;
+  const botMsgBg   = theme.botMsgBg   || "#e0e0e0";
 
   // Inject styles
   const style = document.createElement("style");
@@ -27,25 +27,23 @@
       100% { opacity: 0.2; }
     }
     .bb-avatar {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: url(${avatarUrl}) center/cover no-repeat;
-  cursor: pointer;
-  z-index: 9999;
-  animation: breathing 3s ease-in-out infinite;
-  * Bubble effect */
-  background-color: rgba(255, 255, 255, 0.12); /* subtle transparent fill */
-  box-shadow:
-    inset 0 0 8px rgba(255, 255, 255, 0.5), /* inner glow */
-    0 4px 12px rgba(0, 0, 0, 0.25),         /* drop shadow */
-    0 0 18px rgba(255, 255, 255, 0.25);     /* soft outer glow */
-  backdrop-filter: blur(4px);               /* glass effect */
-}
-
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: url(${avatarUrl}) center/cover no-repeat;
+      cursor: pointer;
+      z-index: 9999;
+      animation: breathing 3s ease-in-out infinite;
+      background-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 0 8px rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.25),
+        0 0 18px rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(4px);
+    }
     .bb-chat {
       position: fixed;
       bottom: 130px;
@@ -111,29 +109,23 @@
       cursor: pointer;
     }
     .bb-bubble {
-  position: fixed;
-  bottom: 90px; /* desktop/tablet default */
-  right: 20px;
-  background: ${primary};
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  z-index: 9999;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-/* Mobile adjustment */
-@media (max-width: 600px) {
-  .bb-bubble {
-    bottom: 85px; /* lower for mobile */
-  }
-}
-
-
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: ${primary};
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 9999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    @media (max-width: 600px) {
+      .bb-bubble { bottom: 85px; }
+    }
     .bb-bubble button {
       background: transparent;
       border: none;
@@ -152,15 +144,9 @@
       align-self: flex-start;
       font-style: italic;
     }
-    .bb-typing span {
-      animation: blink 1.4s infinite both;
-    }
-    .bb-typing span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .bb-typing span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .bb-typing span { animation: blink 1.4s infinite both; }
+    .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
   `;
   document.head.appendChild(style);
 
@@ -169,14 +155,12 @@
   avatar.className = "bb-avatar";
   document.body.appendChild(avatar);
 
-  // --- start 100+ chat head ---
-const langBubble = document.createElement("div");
-langBubble.className = "bb-bubble";
-langBubble.innerHTML = `Hi 👋 I'm fluent in 100+ languages <button aria-label="Close">×</button>`;
-langBubble.querySelector("button").onclick = () => langBubble.remove();
-document.body.appendChild(langBubble);
-// --- end chat bubble 100+ language ---
-
+  // Info bubble
+  const langBubble = document.createElement("div");
+  langBubble.className = "bb-bubble";
+  langBubble.innerHTML = `Hi 👋 I'm fluent in 100+ languages <button aria-label="Close">×</button>`;
+  langBubble.querySelector("button").onclick = () => langBubble.remove();
+  document.body.appendChild(langBubble);
 
   // Chat container
   const chat = document.createElement("div");
@@ -216,6 +200,7 @@ document.body.appendChild(langBubble);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
+  // Add message helper
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -239,7 +224,7 @@ document.body.appendChild(langBubble);
     return msg;
   }
 
-  // Typing indicator helpers
+  // Typing indicator
   let typingEl = null;
   function showTyping() {
     hideTyping();
@@ -256,6 +241,7 @@ document.body.appendChild(langBubble);
     }
   }
 
+  // === BOT COMMUNICATION ===
   async function sendToBot(message) {
     addMsg(message, "user");
     input.value = "";
@@ -272,10 +258,7 @@ document.body.appendChild(langBubble);
         return;
       }
       const data = await res.json();
-      let botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
-      if (botReply.trim().toLowerCase() === "i don't know") {
-        botReply = "I’m sorry, I don’t have that information right now. Could you try rephrasing your question?";
-      }
+      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
       addMsg(botReply);
     } catch {
       hideTyping();
@@ -283,21 +266,27 @@ document.body.appendChild(langBubble);
     }
   }
 
+  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (messages.childElementCount === 0) addMsg(greeting);
+    if (notifDot && notifDot.parentNode) notifDot.remove();
+    if (greeting && messages.childElementCount === 0) {
+      addMsg(greeting, "bot");
+    }
   }
 
-  avatar.onclick = () => {
-    openChat();
-    bubble?.remove?.();
-  };
+  avatar.onclick = () => openChat();
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-  input.addEventListener("keydown", e => {
+
+  input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendBtn.click();
   });
-})();
+
+  micBtn.onclick = () => {
+    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
+  };
+})(); // close IIFE
