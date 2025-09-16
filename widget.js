@@ -103,7 +103,7 @@
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
     /* === MOBILE FIXES === */
-    @media (max-width: 600px) {
+@media (max-width: 600px) {
   .bb-avatar {
     width: 120px;
     height: 120px;
