@@ -5,6 +5,7 @@
   const avatarUrl  = cfg.avatar     || "";
   const botName    = cfg.botName    || "AVA";
   const botImage   = cfg.botImage   || avatarUrl;
+  const greeting   = cfg.greeting   || null;
   const apiBase    = (cfg.api || "").replace(/\/+$/, "");
   const theme      = cfg.theme || {};
 
@@ -21,7 +22,6 @@
     @keyframes breathing { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
 
-    /* Large Floating Avatar */
     .bb-avatar {
       position: fixed;
       bottom: 20px;
@@ -33,9 +33,8 @@
       cursor: pointer;
       z-index: 99999;
       animation: breathing 3s ease-in-out infinite;
+      position: relative;
     }
-
-    /* Red notification dot */
     .bb-notif {
       position: absolute;
       top: 12px;
@@ -47,8 +46,6 @@
       border: 2px solid white;
       box-shadow: 0 0 6px rgba(0,0,0,0.3);
     }
-
-    /* Chat Window */
     .bb-chat {
       position: fixed;
       bottom: 20px;
@@ -65,7 +62,6 @@
       overflow: hidden;
       font-family: sans-serif;
     }
-
     .bb-chat-header {
       display: flex;
       align-items: center;
@@ -76,13 +72,10 @@
     .bb-chat-header img { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; }
     .bb-chat-header span { flex: 1; font-weight: bold; }
     .bb-chat-header button { background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer; }
-
     .bb-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-
     .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
     .bb-inputbar input { flex: 1; border: none; padding: 10px; }
     .bb-inputbar button { background: ${primary}; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
-
     .bb-typing {
       display: inline-block;
       background: ${botMsgBg};
@@ -102,12 +95,9 @@
   // === SECTION 4: AVATAR ===
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
-
-  // Red notification dot
   const notifDot = document.createElement("div");
   notifDot.className = "bb-notif";
   avatar.appendChild(notifDot);
-
   document.body.appendChild(avatar);
 
   // === SECTION 5: CHAT CONTAINER ===
@@ -155,7 +145,6 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
-
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -165,7 +154,6 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
-
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
@@ -182,10 +170,7 @@
     messages.scrollTop = messages.scrollHeight;
   }
   function hideTyping() {
-    if (typingEl) {
-      typingEl.remove();
-      typingEl = null;
-    }
+    if (typingEl) { typingEl.remove(); typingEl = null; }
   }
 
   // === SECTION 8: BOT COMMUNICATION ===
@@ -216,10 +201,13 @@
   // === SECTION 9: EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    notifDot.remove(); // remove red dot once opened
+    notifDot.remove();
+    if (greeting && messages.childElementCount === 0) {
+      addMsg(greeting, "bot");
+    }
   }
 
   avatar.onclick = () => openChat();
-
   sendBtn.onclick = () => {
-    const msg = input.value
+    const msg = input.value.trim();
+    if (msg) send
