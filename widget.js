@@ -72,6 +72,7 @@
     .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
     .bb-inputbar input { flex: 1; border: none; padding: 10px; }
     .bb-inputbar button { background: ${primary}; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
+    .bb-inputbar button.mic { margin-left: 4px; }
     .bb-typing {
       display: inline-block;
       background: ${botMsgBg};
@@ -123,8 +124,13 @@
   input.placeholder = "Ask AVA...";
   const sendBtn = document.createElement("button");
   sendBtn.textContent = "Ask";
+  const micBtn = document.createElement("button");
+  micBtn.className = "mic";
+  micBtn.innerHTML = "🎤";
+
   inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
+  inputBar.appendChild(micBtn);
 
   chat.appendChild(header);
   chat.appendChild(messages);
@@ -211,5 +217,9 @@
   input.addEventListener("keydown", e => {
     if (e.key === "Enter") sendBtn.click();
   });
+
+  micBtn.onclick = () => {
+    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
+  };
 
 })(); // close IIFE
