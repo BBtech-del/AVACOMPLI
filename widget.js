@@ -103,22 +103,30 @@
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
     /* === MOBILE FIXES === */
+html, body {
+  overflow: visible !important;
+  position: static !important;
+}
+
 @media (max-width: 600px) {
   .bb-avatar {
     width: 120px;
     height: 120px;
     bottom: 10px;
     right: 10px;
-    background-color: #f0f0f0;
+    background-color: #f0f0f0; /* fallback behind transparent PNG */
     display: block !important;
     visibility: visible !important;
+    position: fixed !important;
+    z-index: 2147483647 !important;
   }
   .bb-chat {
     width: 95%;
     left: 2.5%;
     right: 2.5%;
     height: 70%;
-    bottom: 140px;
+    bottom: 140px; /* lifted above larger avatar */
+    position: fixed !important;
   }
 }
   `;
