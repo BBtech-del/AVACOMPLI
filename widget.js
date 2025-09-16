@@ -1,4 +1,5 @@
 (function () {
+
   // === CONFIGURATION LOADER ===
   const cfg = window.MyBotConfig || {};
   const clientId   = cfg.clientId   || "default";
@@ -29,7 +30,7 @@
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 2147483647; /* max z-index */
+      z-index: 99999;
     }
     .bb-notif {
       position: absolute;
@@ -45,7 +46,7 @@
     .bb-chat {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      right: 20px; /* flush right */
       width: 360px;
       height: 500px;
       background: ${background};
@@ -54,7 +55,7 @@
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      z-index: 2147483647;
+      z-index: 99999;
       overflow: hidden;
       font-family: sans-serif;
     }
@@ -99,6 +100,7 @@
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
+    /* === MOBILE FIXES === */
     @media (max-width: 600px) {
       .bb-avatar {
         width: 80px;
@@ -231,4 +233,4 @@
 
   // === EVENT LISTENERS ===
   function openChat() {
-    chat.style
+    chat
