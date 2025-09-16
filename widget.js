@@ -208,6 +208,14 @@
   }
 
   avatar.onclick = () => openChat();
+
   sendBtn.onclick = () => {
     const msg = input.value.trim();
-    if (msg) send
+    if (msg) sendToBot(msg);
+  };
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") sendBtn.click();
+  });
+
+})(); // close the IIFE
