@@ -102,12 +102,7 @@
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
-    /* === MOBILE FIXES === */
-html, body {
-  overflow: visible !important;
-  position: static !important;
-}
-
+   /* === MOBILE FIXES === */
 @media (max-width: 600px) {
   .bb-avatar {
     width: 120px;
@@ -120,10 +115,11 @@ html, body {
     position: fixed !important;
     z-index: 2147483647 !important;
   }
+
   .bb-chat {
     width: 95%;
     left: 2.5%;
-    right: 2.5%;
+    right: auto;
     height: 70%;
     bottom: 140px; /* lifted above larger avatar */
     position: fixed !important;
