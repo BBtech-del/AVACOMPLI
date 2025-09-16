@@ -102,14 +102,14 @@
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
-   /* === MOBILE FIXES === */
+  /* === MOBILE FIXES === */
 @media (max-width: 600px) {
   .bb-avatar {
-    width: 120px;
-    height: 120px;
-    bottom: 10px;
-    right: 10px;
-    background-color: #f0f0f0; /* fallback behind transparent PNG */
+    width: 80px;   /* shrink for small screens */
+    height: 80px;
+    bottom: 15px;
+    right: 15px;
+    background-color: #f0f0f0; /* fallback so transparent PNG is visible */
     display: block !important;
     visibility: visible !important;
     position: fixed !important;
@@ -121,7 +121,7 @@
     left: 2.5%;
     right: auto;
     height: 70%;
-    bottom: 140px; /* lifted above larger avatar */
+    bottom: 110px; /* lifted above avatar */
     position: fixed !important;
   }
 }
