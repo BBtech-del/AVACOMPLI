@@ -32,16 +32,25 @@
       z-index: 2147483647; /* ensure on top */
     }
     .bb-notif {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 20px;
-      height: 20px;
-      background: red;
-      border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 0 6px rgba(0,0,0,0.3);
-    }
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background: red;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+ 
+  /* add Number in the notif */
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
     .bb-chat {
       position: fixed;
       bottom: 20px;
@@ -129,6 +138,7 @@
   avatar.className = "bb-avatar";
   const notifDot = document.createElement("div");
   notifDot.className = "bb-notif";
+  notifDot.textContent = "1";
   avatar.appendChild(notifDot);
   document.body.appendChild(avatar);
 
