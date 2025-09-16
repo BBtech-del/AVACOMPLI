@@ -100,8 +100,19 @@
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
     @media (max-width: 600px) {
-      .bb-avatar { width: 80px; height: 80px; bottom: 10px; right: 10px; }
-      .bb-chat { width: 95%; right: 2.5%; height: 70%; }
+      .bb-avatar {
+        width: 80px;
+        height: 80px;
+        bottom: 10px;
+        right: 10px;
+      }
+      .bb-chat {
+        width: 95%;
+        left: 2.5%;
+        right: 2.5%;
+        height: 70%;
+        bottom: 100px; /* lift above avatar */
+      }
     }
   `;
   document.head.appendChild(style);
@@ -214,4 +225,10 @@
       addMsg(botReply);
     } catch {
       hideTyping();
-      addMsg("I had trouble replying just
+      addMsg("I had trouble replying just now.");
+    }
+  }
+
+  // === EVENT LISTENERS ===
+  function openChat() {
+    chat.style
