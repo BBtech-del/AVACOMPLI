@@ -11,7 +11,7 @@
   // === SECTION 2: THEME COLORS ===
   const background = theme.background || "#ffffff";
   const textColor  = theme.text       || "#1a1a1a";
-  const primary    = theme.primary    || "#2b2b2b";   // metallic black
+  const primary    = theme.primary    || "#2b2b2b";
   const userMsgBg  = theme.userMsgBg  || primary;
   const botMsgBg   = theme.botMsgBg   || "#e6e6e6";
 
@@ -26,18 +26,17 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 240px;   /* triple size */
+      width: 240px;
       height: 240px;
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 9999;
+      z-index: 99999;
       animation: breathing 3s ease-in-out infinite;
-      position: relative;
     }
 
     /* Red notification dot */
-    .bb-avatar .bb-notif {
+    .bb-notif {
       position: absolute;
       top: 12px;
       right: 12px;
@@ -53,7 +52,7 @@
     .bb-chat {
       position: fixed;
       bottom: 20px;
-      right: 280px; /* offset so it doesn't overlap avatar */
+      right: 280px;
       width: 360px;
       height: 500px;
       background: ${background};
@@ -62,7 +61,7 @@
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      z-index: 9999;
+      z-index: 99999;
       overflow: hidden;
       font-family: sans-serif;
     }
@@ -135,9 +134,9 @@
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Ask AVA...";   // updated placeholder
+  input.placeholder = "Ask AVA...";
   const sendBtn = document.createElement("button");
-  sendBtn.textContent = "Ask";        // updated button label
+  sendBtn.textContent = "Ask";
   inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
 
