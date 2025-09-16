@@ -18,29 +18,73 @@
   // === STYLE INJECTION ===
   const style = document.createElement("style");
   style.textContent = `
-    @keyframes breathing {0%{transform:scale(1);}50%{transform:scale(1.05);}100%{transform:scale(1);}}
     @keyframes blink {0%{opacity:0.2;}20%{opacity:1;}100%{opacity:0.2;}}
-    .bb-avatar{position:fixed;bottom:20px;right:20px;width:240px;height:240px;border-radius:50%;
-      background:url(${avatarUrl}) center/cover no-repeat;cursor:pointer;z-index:99999;
-      animation:breathing 3s ease-in-out infinite;position:relative;}
-    .bb-notif{position:absolute;top:12px;right:12px;width:20px;height:20px;background:red;
-      border-radius:50%;border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3);}
-    .bb-chat{position:fixed;bottom:20px;right:280px;width:360px;height:500px;background:${background};
-      color:${textColor};border:1px solid ${primary};border-radius:8px;display:none;flex-direction:column;
-      z-index:99999;overflow:hidden;font-family:sans-serif;}
-    .bb-chat-header{display:flex;align-items:center;background:${primary};color:#fff;padding:8px;}
-    .bb-chat-header img{width:32px;height:32px;border-radius:50%;margin-right:8px;}
-    .bb-chat-header span{flex:1;font-weight:bold;}
-    .bb-chat-header button{background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;}
-    .bb-messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;}
-    .bb-inputbar{display:flex;border-top:1px solid ${primary};}
-    .bb-inputbar input{flex:1;border:none;padding:10px;}
-    .bb-inputbar button{background:${primary};color:#fff;border:none;padding:10px 15px;cursor:pointer;}
-    .bb-typing{display:inline-block;background:${botMsgBg};color:#000;padding:8px;border-radius:6px;
-      max-width:80%;align-self:flex-start;font-style:italic;}
-    .bb-typing span{animation:blink 1.4s infinite both;}
-    .bb-typing span:nth-child(2){animation-delay:0.2s;}
-    .bb-typing span:nth-child(3){animation-delay:0.4s;}
+
+    .bb-avatar {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: url(${avatarUrl}) center/cover no-repeat;
+      cursor: pointer;
+      z-index: 99999;
+    }
+    .bb-notif {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      background: red;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    }
+    .bb-chat {
+      position: fixed;
+      bottom: 20px;
+      right: 20px; /* flush right */
+      width: 360px;
+      height: 500px;
+      background: ${background};
+      color: ${textColor};
+      border: 1px solid ${primary};
+      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      z-index: 99999;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    .bb-chat-header {
+      display: flex;
+      align-items: center;
+      background: ${primary};
+      color: #fff;
+      padding: 8px;
+    }
+    .bb-chat-header img { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; }
+    .bb-chat-header span { flex: 1; font-weight: bold; }
+    .bb-chat-header button { background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+    .bb-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
+    .bb-inputbar input { flex: 1; border: none; padding: 10px; }
+    .bb-inputbar button { background: ${primary}; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
+    .bb-typing {
+      display: inline-block;
+      background: ${botMsgBg};
+      color: #000;
+      padding: 8px;
+      border-radius: 6px;
+      max-width: 80%;
+      align-self: flex-start;
+      font-style: italic;
+    }
+    .bb-typing span { animation: blink 1.4s infinite both; }
+    .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
   `;
   document.head.appendChild(style);
 
