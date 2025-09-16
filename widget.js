@@ -24,8 +24,8 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 240px;
-      height: 240px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
