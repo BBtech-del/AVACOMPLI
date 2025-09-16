@@ -167,9 +167,15 @@
   // Avatar button
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
-  notifDot.className = "bb-notif";
-  avatar.appendChild(notifDot);
   document.body.appendChild(avatar);
+
+  // --- start 100+ chat head ---
+const langBubble = document.createElement("div");
+langBubble.className = "bb-bubble";
+langBubble.innerHTML = `Hi 👋 I'm fluent in 100+ languages <button aria-label="Close">×</button>`;
+langBubble.querySelector("button").onclick = () => langBubble.remove();
+document.body.appendChild(langBubble);
+// --- end chat bubble 100+ language ---
 
 
   // Chat container
@@ -199,20 +205,17 @@
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Ask AVA...";
+  input.placeholder = "Type your message...";
   const sendBtn = document.createElement("button");
-  sendBtn.className = "ask";
-  sendBtn.textContent = "Ask";
-  const micBtn = document.createElement("button");
-  micBtn.className = "mic";
-  micBtn.innerHTML = "🎤";
+  sendBtn.textContent = "Send";
+  inputBar.appendChild(input);
+  inputBar.appendChild(sendBtn);
 
   chat.appendChild(header);
   chat.appendChild(messages);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
-  // === MESSAGE HANDLER ===
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -222,7 +225,6 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
-
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -232,13 +234,12 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
-
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
   }
 
-  // === TYPING INDICATOR ===
+  // Typing indicator helpers
   let typingEl = null;
   function showTyping() {
     hideTyping();
@@ -255,7 +256,6 @@
     }
   }
 
-  // === BOT COMMUNICATION ===
   async function sendToBot(message) {
     addMsg(message, "user");
     input.value = "";
@@ -272,7 +272,10 @@
         return;
       }
       const data = await res.json();
-      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      let botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      if (botReply.trim().toLowerCase() === "i don't know") {
+        botReply = "I’m sorry, I don’t have that information right now. Could you try rephrasing your question?";
+      }
       addMsg(botReply);
     } catch {
       hideTyping();
@@ -280,26 +283,21 @@
     }
   }
 
-  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (notifDot && notifDot.parentNode) notifDot.remove();
-    if (greeting && messages.childElementCount === 0) {
-      addMsg(greeting, "bot");
-    }
+    if (messages.childElementCount === 0) addMsg(greeting);
   }
 
-  avatar.onclick = () => openChat();
+  avatar.onclick = () => {
+    openChat();
+    bubble?.remove?.();
+  };
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", e => {
     if (e.key === "Enter") sendBtn.click();
   });
-
-  micBtn.onclick = () => {
-    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
-  };
+})();
