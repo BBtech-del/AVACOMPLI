@@ -167,6 +167,8 @@
   // Avatar button
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
+  notifDot.className = "bb-notif";
+  avatar.appendChild(notifDot);
   document.body.appendChild(avatar);
 
 
@@ -197,17 +199,20 @@
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Type your message...";
+  input.placeholder = "Ask AVA...";
   const sendBtn = document.createElement("button");
-  sendBtn.textContent = "Send";
-  inputBar.appendChild(input);
-  inputBar.appendChild(sendBtn);
+  sendBtn.className = "ask";
+  sendBtn.textContent = "Ask";
+  const micBtn = document.createElement("button");
+  micBtn.className = "mic";
+  micBtn.innerHTML = "🎤";
 
   chat.appendChild(header);
   chat.appendChild(messages);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
+  // === MESSAGE HANDLER ===
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -217,6 +222,7 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
+
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -226,12 +232,13 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
+
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
   }
 
-  // Typing indicator helpers
+  // === TYPING INDICATOR ===
   let typingEl = null;
   function showTyping() {
     hideTyping();
@@ -248,6 +255,7 @@
     }
   }
 
+  // === BOT COMMUNICATION ===
   async function sendToBot(message) {
     addMsg(message, "user");
     input.value = "";
@@ -264,10 +272,7 @@
         return;
       }
       const data = await res.json();
-      let botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
-      if (botReply.trim().toLowerCase() === "i don't know") {
-        botReply = "I’m sorry, I don’t have that information right now. Could you try rephrasing your question?";
-      }
+      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
       addMsg(botReply);
     } catch {
       hideTyping();
@@ -275,21 +280,26 @@
     }
   }
 
+  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (messages.childElementCount === 0) addMsg(greeting);
+    if (notifDot && notifDot.parentNode) notifDot.remove();
+    if (greeting && messages.childElementCount === 0) {
+      addMsg(greeting, "bot");
+    }
   }
 
-  avatar.onclick = () => {
-    openChat();
-    bubble?.remove?.();
-  };
+  avatar.onclick = () => openChat();
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-  input.addEventListener("keydown", e => {
+
+  input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendBtn.click();
   });
-})();
+
+  micBtn.onclick = () => {
+    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
+  };
