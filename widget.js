@@ -172,12 +172,28 @@
   const notifDot = document.createElement("div");
   notifDot.className = "bb-notif";
   avatar.appendChild(notifDot);
-  document.body.appendChild(avatar)
+  document.body.appendChild(avatar);
 
-
-  // Chat container
+  // === CHAT CONTAINER ===
   const chat = document.createElement("div");
   chat.className = "bb-chat";
+
+  const header = document.createElement("div");
+  header.className = "bb-chat-header";
+  const headerImg = document.createElement("img");
+  headerImg.src = botImage;
+  const headerTitle = document.createElement("span");
+  headerTitle.textContent = botName;
+  const headerClose = document.createElement("button");
+  headerClose.innerHTML = "×";
+  headerClose.onclick = () => (chat.style.display = "none");
+  header.appendChild(headerImg);
+  header.appendChild(headerTitle);
+  header.appendChild(headerClose);
+
+  const messages = document.createElement("div");
+  messages.className = "bb-messages";
+
   const inputBar = document.createElement("div");
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
@@ -189,7 +205,8 @@
   const micBtn = document.createElement("button");
   micBtn.className = "mic";
   micBtn.innerHTML = "🎤";
-inputBar.appendChild(input);
+
+  inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
   inputBar.appendChild(micBtn);
 
@@ -198,40 +215,7 @@ inputBar.appendChild(input);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
-  // Header
-  const header = document.createElement("div");
-  header.className = "bb-chat-header";
-  const headerImg = document.createElement("img");
-  headerImg.src = botImage;
-  const headerTitle = document.createElement("span");
-  headerTitle.textContent = botName;
-  const headerClose = document.createElement("button");
-  headerClose.innerHTML = "×";
-  headerClose.onclick = () => chat.style.display = "none";
-  header.appendChild(headerImg);
-  header.appendChild(headerTitle);
-  header.appendChild(headerClose);
-
-  // Messages area
-  const messages = document.createElement("div");
-  messages.className = "bb-messages";
-
-  // Input bar
-  const inputBar = document.createElement("div");
-  inputBar.className = "bb-inputbar";
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Type your message...";
-  const sendBtn = document.createElement("button");
-  sendBtn.textContent = "Send";
-  inputBar.appendChild(input);
-  inputBar.appendChild(sendBtn);
-
-  chat.appendChild(header);
-  chat.appendChild(messages);
-  chat.appendChild(inputBar);
-  document.body.appendChild(chat);
-
+  // === MESSAGE HANDLER ===
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -241,6 +225,7 @@ inputBar.appendChild(input);
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
+
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -250,10 +235,12 @@ inputBar.appendChild(input);
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
+
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
   }
+
 
   // Typing indicator helpers
   let typingEl = null;
@@ -299,25 +286,21 @@ inputBar.appendChild(input);
     }
   }
 
-  // === EVENT LISTENERS ===
   function openChat() {
     chat.style.display = "flex";
-    if (notifDot && notifDot.parentNode) notifDot.remove();
-    if (greeting && messages.childElementCount === 0) {
-      addMsg(greeting, "bot");
-    }
+    if (messages.childElementCount === 0) addMsg(greeting);
   }
 
-  avatar.onclick = () => openChat();
+  avatar.onclick = () => {
+    openChat();
+    bubble?.remove?.();
+  };
 
   sendBtn.onclick = () => {
     const msg = input.value.trim();
     if (msg) sendToBot(msg);
   };
-
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", e => {
     if (e.key === "Enter") sendBtn.click();
   });
-
-  micBtn.onclick = () => {
-
+})();
