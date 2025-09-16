@@ -1,60 +1,62 @@
 (function () {
-  // === CONFIGURATION LOADER ===
   const cfg = window.MyBotConfig || {};
-  const clientId   = cfg.clientId   || "default";
-  const avatarUrl  = cfg.avatar     || "";
-  const botName    = cfg.botName    || "AVA";
-  const botImage   = cfg.botImage   || avatarUrl;
-  const greeting   = cfg.greeting   || null;
-  const apiBase    = (cfg.api || "").replace(/\/+$/, "");
-  const theme      = cfg.theme || {};
+  const clientId  = cfg.clientId || "default";
+  const avatarUrl = cfg.avatar || "";
+  const botName   = cfg.botName || "AVA";  // new bot name
+  const botImage  = cfg.botImage || avatarUrl;
+  const apiBase   = (cfg.api || "").replace(/\/+$/, ""); // new API base
+  const theme     = cfg.theme || {};
 
   const background = theme.background || "#ffffff";
-  const textColor  = theme.text       || "#1a1a1a";
-  const primary    = theme.primary    || "#2b2b2b";
+  const textColor  = theme.text       || "#222222";
+  const primary    = theme.primary    || "#4a90e2";
   const userMsgBg  = theme.userMsgBg  || primary;
-  const botMsgBg   = theme.botMsgBg   || "#e6e6e6";
+  const botMsgBg   = theme.botMsgBg   || "#e0e0e0";
 
-  // === STYLE INJECTION ===
+  // Inject styles
   const style = document.createElement("style");
   style.textContent = `
-    @keyframes blink {0%{opacity:0.2;}20%{opacity:1;}100%{opacity:0.2;}}
-
+    @keyframes breathing {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
     .bb-avatar {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      width: 240px;
-      height: 240px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 2147483647; /* ensure on top */
-    }
-    .bb-notif {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 20px;
-      height: 20px;
-      background: red;
-      border-radius: 50%;
-      border: 2px solid white;
-      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+      z-index: 9999;
+      animation: breathing 3s ease-in-out infinite;
+      background-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 0 8px rgba(255, 255, 255, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.25),
+        0 0 18px rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(4px);
     }
     .bb-chat {
       position: fixed;
-      bottom: 20px;
-      right: 20px; /* flush right */
-      width: 360px;
-      height: 500px;
+      bottom: 130px;
+      right: 20px;
+      width: 320px;
+      height: 400px;
       background: ${background};
       color: ${textColor};
       border: 1px solid ${primary};
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      z-index: 2147483647;
+      z-index: 9999;
       overflow: hidden;
       font-family: sans-serif;
     }
@@ -65,29 +67,73 @@
       color: #fff;
       padding: 8px;
     }
-    .bb-chat-header img { width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; }
-    .bb-chat-header span { flex: 1; font-weight: bold; }
-    .bb-chat-header button { background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer; }
-
-    .bb-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-
-    .bb-inputbar { display: flex; border-top: 1px solid ${primary}; }
-    .bb-inputbar input { flex: 1; border: none; padding: 10px; }
-    .bb-inputbar button { border: none; cursor: pointer; }
-    .bb-inputbar button.ask {
+    .bb-chat-header img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .bb-chat-header span {
+      flex: 1;
+      font-weight: bold;
+    }
+    .bb-chat-header button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .bb-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bb-inputbar {
+      display: flex;
+      border-top: 1px solid ${primary};
+    }
+    .bb-inputbar input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+    }
+    .bb-inputbar button {
       background: ${primary};
       color: #fff;
+      border: none;
       padding: 10px 15px;
+      cursor: pointer;
     }
-    .bb-inputbar button.mic {
-      background: #1abc9c; /* teal */
+    .bb-bubble {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: ${primary};
       color: #fff;
-      padding: 10px;
-      margin-left: 4px;
-      border-radius: 4px;
-      font-size: 16px;
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 9999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-
+    @media (max-width: 600px) {
+      .bb-bubble { bottom: 85px; }
+    }
+    .bb-bubble button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: 4px;
+    }
     .bb-typing {
       display: inline-block;
       background: ${botMsgBg};
@@ -101,46 +147,26 @@
     .bb-typing span { animation: blink 1.4s infinite both; }
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
-
-    /* === MOBILE FIXES === */
-    @media (max-width: 600px) {
-      .bb-avatar {
-        width: 80px;
-        height: 80px;
-        bottom: 15px;
-        right: 15px;
-        background-color: #f0f0f0;
-        display: block !important;
-        visibility: visible !important;
-        position: fixed !important;
-        z-index: 2147483647 !important;
-      }
-
-      .bb-chat {
-        width: 95%;
-        left: 2.5%;
-        right: auto;
-        max-height: calc(100vh - 140px); /* always fits above avatar */
-        height: auto;
-        bottom: 110px;
-        position: fixed !important;
-      }
-    }
   `;
   document.head.appendChild(style);
 
-  // === AVATAR ===
+  // Avatar button
   const avatar = document.createElement("div");
   avatar.className = "bb-avatar";
-  const notifDot = document.createElement("div");
-  notifDot.className = "bb-notif";
-  avatar.appendChild(notifDot);
   document.body.appendChild(avatar);
 
-  // === CHAT CONTAINER ===
+  // Info bubble
+  const langBubble = document.createElement("div");
+  langBubble.className = "bb-bubble";
+  langBubble.innerHTML = `Hi 👋 I'm fluent in 100+ languages <button aria-label="Close">×</button>`;
+  langBubble.querySelector("button").onclick = () => langBubble.remove();
+  document.body.appendChild(langBubble);
+
+  // Chat container
   const chat = document.createElement("div");
   chat.className = "bb-chat";
 
+  // Header
   const header = document.createElement("div");
   header.className = "bb-chat-header";
   const headerImg = document.createElement("img");
@@ -149,36 +175,32 @@
   headerTitle.textContent = botName;
   const headerClose = document.createElement("button");
   headerClose.innerHTML = "×";
-  headerClose.onclick = () => (chat.style.display = "none");
+  headerClose.onclick = () => chat.style.display = "none";
   header.appendChild(headerImg);
   header.appendChild(headerTitle);
   header.appendChild(headerClose);
 
+  // Messages area
   const messages = document.createElement("div");
   messages.className = "bb-messages";
 
+  // Input bar
   const inputBar = document.createElement("div");
   inputBar.className = "bb-inputbar";
   const input = document.createElement("input");
   input.type = "text";
-  input.placeholder = "Ask AVA...";
+  input.placeholder = "Type your message...";
   const sendBtn = document.createElement("button");
-  sendBtn.className = "ask";
-  sendBtn.textContent = "Ask";
-  const micBtn = document.createElement("button");
-  micBtn.className = "mic";
-  micBtn.innerHTML = "🎤";
-
+  sendBtn.textContent = "Send";
   inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
-  inputBar.appendChild(micBtn);
 
   chat.appendChild(header);
   chat.appendChild(messages);
   chat.appendChild(inputBar);
   document.body.appendChild(chat);
 
-  // === MESSAGE HANDLER ===
+  // Add message helper
   function addMsg(text, from = "bot") {
     const msg = document.createElement("div");
     msg.textContent = text;
@@ -188,7 +210,6 @@
     msg.style.maxWidth = "80%";
     msg.style.wordWrap = "break-word";
     msg.style.display = "inline-block";
-
     if (from === "bot") {
       msg.style.background = botMsgBg;
       msg.style.color = "#000";
@@ -198,13 +219,12 @@
       msg.style.color = "#fff";
       msg.style.alignSelf = "flex-end";
     }
-
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
     return msg;
   }
 
-  // === TYPING INDICATOR ===
+  // Typing indicator
   let typingEl = null;
   function showTyping() {
     hideTyping();
