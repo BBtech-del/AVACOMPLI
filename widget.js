@@ -225,10 +225,10 @@
     }
   }
 
- // === BOT COMMUNICATION ===
+// === BOT COMMUNICATION ===
 async function sendToBot(message) {
-  addMsg(message, "user");
-  input.value = "";
+  addMsg(message, "user");   // show user message
+  input.value = "";          // clear input box
   showTyping();
   try {
     const res = await fetch(`${apiBase}/chat`, {
@@ -245,10 +245,11 @@ async function sendToBot(message) {
     const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
     addMsg(botReply);
 
-    // 🔊 NEW: speak the reply using Alloy
+    // 🔊 Speak the reply using Alloy
     speakReply(botReply);
 
-  } catch {
+  } catch (err) {
+    console.error("sendToBot error:", err);
     hideTyping();
     addMsg("I had trouble replying just now.");
   }
@@ -262,19 +263,23 @@ async function speakReply(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, voice: "alloy" })
     });
-    if (!resp.ok) return;
+    if (!resp.ok) {
+      console.error("Voice API error:", resp.status);
+      return;
+    }
 
-    const audioData = await resp.arrayBuffer();
-    const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+    // Use blob so any audio type works (mp3, wav, webm, etc.)
+    const audioBlob = await resp.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
 
     const audio = new Audio(audioUrl);
-    audio.play();
+    audio.play().catch(err => {
+      console.error("Audio playback blocked or failed:", err);
+    });
   } catch (err) {
     console.error("Voice playback failed", err);
   }
 }
-
 
   // === EVENT LISTENERS ===
   function openChat() {
@@ -319,18 +324,29 @@ mediaRecorder.onstop = async () => {
   const formData = new FormData();
   formData.append("file", blob, "speech.webm");
 
-  const resp = await fetch(`${apiBase}/stt`, {
-    method: "POST",
-    body: formData
-  });
+  try {
+    const resp = await fetch(`${apiBase}/stt`, {
+      method: "POST",
+      body: formData
+    });
 
-  const data = await resp.json();
-const transcript = data.text;
-if (transcript) {
-  sendToBot(transcript);
-} else {
-  addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
-}
+    if (!resp.ok) {
+      addMsg("🎤 Speech‑to‑text failed.", "bot");
+      return;
+    }
+
+    const data = await resp.json();
+    const transcript = data.text;
+
+    if (transcript && transcript.trim() !== "") {
+      // ✅ Only call sendToBot — it will add the user message and trigger voice
+      sendToBot(transcript);
+    } else {
+      addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
+    }
+  } catch (err) {
+    addMsg("🎤 STT error: " + err.message, "bot");
+  }
 };
 
 mediaRecorder.start();
@@ -342,3 +358,4 @@ setTimeout(() => mediaRecorder.stop(), 5000);
 }
 };
 })();
+
