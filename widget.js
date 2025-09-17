@@ -118,7 +118,6 @@
     height: 120px;
     bottom: 10px;
     right: 10px;
-    background-color: #f0f0f0;
     display: block !important;
     visibility: visible !important;
   }
