@@ -330,3 +330,5 @@ async function speakReply(text) {
     addMsg("🎤 Microphone error: " + err.message, "bot");
   }
 };
+})();
+
