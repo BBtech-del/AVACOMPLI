@@ -296,27 +296,21 @@ async function speakReply(text) {
     if (e.key === "Enter") sendBtn.click();
   });
 
-  micBtn.onclick = async () => {
+ micBtn.onclick = async () => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
 
-    micBtn.onclick = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    const chunks = [];
-
-    // 🔴 Change button style to show recording
-micBtn.style.background = "white";
-micBtn.style.color = "red";
-micBtn.textContent = "🔴"; // record icon
+   // 🔴 Add a recording indicator
+micBtn.style.background = "white"; 
+micBtn.style.color = "red"; 
+micBtn.textContent = "🔴"; // change icon while recording
 
 mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
 mediaRecorder.onstop = async () => {
-  // ✅ Reset button style
+  // reset button style
   micBtn.style.background = "#1abc9c";
   micBtn.style.color = "white";
   micBtn.textContent = "🎤";
@@ -339,7 +333,6 @@ mediaRecorder.onstop = async () => {
 mediaRecorder.start();
 addMsg("🎤 Listening...", "bot");
 
-// Stop after 5 seconds
 setTimeout(() => mediaRecorder.stop(), 5000);
 } catch (err) {
   addMsg("🎤 Microphone error: " + err.message, "bot");
