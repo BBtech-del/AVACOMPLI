@@ -194,7 +194,7 @@
       msg.style.alignSelf = "flex-start";
     } else {
       msg.style.background = userMsgBg;
-      msg.style.color = "#fff";
+      msg.style.color = "#000";
       msg.style.alignSelf = "flex-end";
     }
 
