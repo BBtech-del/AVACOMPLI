@@ -324,8 +324,10 @@ mediaRecorder.onstop = async () => {
     body: formData
   });
 
+  const data = await resp.json();
   const transcript = data.text;
-sendToBot(transcript);
+  addMsg("🎤 " + transcript, "user");
+  sendToBot(transcript);
 };
 
 mediaRecorder.start();
@@ -337,4 +339,3 @@ setTimeout(() => mediaRecorder.stop(), 5000);
 }
 };
 })();
-
