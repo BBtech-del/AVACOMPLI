@@ -29,32 +29,30 @@
       border-radius: 50%;
       background: url(${avatarUrl}) center/cover no-repeat;
       cursor: pointer;
-      z-index: 2147483647; /* ensure on top */
+      z-index: 2147483647;
     }
     .bb-notif {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 20px;
-  height: 20px;
-  background: red;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
- 
-  /* add Number in the notif */
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      background: red;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 6px rgba(0,0,0,0.3);
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     .bb-chat {
       position: fixed;
       bottom: 20px;
-      right: 20px; /* flush right */
+      right: 20px;
       width: 360px;
       height: 500px;
       background: ${background};
@@ -89,7 +87,7 @@
       padding: 10px 15px;
     }
     .bb-inputbar button.mic {
-      background: #1abc9c; /* teal */
+      background: #1abc9c;
       color: #fff;
       padding: 10px;
       margin-left: 4px;
@@ -111,24 +109,21 @@
     .bb-typing span:nth-child(2) { animation-delay: 0.2s; }
     .bb-typing span:nth-child(3) { animation-delay: 0.4s; }
 
-    /* === MOBILE FIXES === */
-@media (max-width: 600px) {
-  .bb-avatar {
-    width: 120px;
-    height: 120px;
-    bottom: 10px;
-    right: 10px;
-    display: block !important;
-    visibility: visible !important;
-  }
-  .bb-chat {
-    width: 95%;
-    left: 2.5%;
-    right: 2.5%;
-    height: 70%;
-    bottom: 140px;
-  }
-}
+    @media (max-width: 600px) {
+      .bb-avatar {
+        width: 120px;
+        height: 120px;
+        bottom: 10px;
+        right: 10px;
+      }
+      .bb-chat {
+        width: 95%;
+        left: 2.5%;
+        right: 2.5%;
+        height: 70%;
+        bottom: 140px;
+      }
+    }
   `;
   document.head.appendChild(style);
 
@@ -225,61 +220,59 @@
     }
   }
 
-// === BOT COMMUNICATION ===
-async function sendToBot(message) {
-  addMsg(message, "user");   // show user message
-  input.value = "";          // clear input box
-  showTyping();
-  try {
-    const res = await fetch(`${apiBase}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId, message })
-    });
-    hideTyping();
-    if (!res.ok) {
-      addMsg(`I had trouble replying just now (status ${res.status}).`);
-      return;
+  // === BOT COMMUNICATION ===
+  async function sendToBot(message) {
+    addMsg(message, "user");
+    input.value = "";
+    showTyping();
+    try {
+      const res = await fetch(`${apiBase}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId, message })
+      });
+      hideTyping();
+      if (!res.ok) {
+        addMsg(`I had trouble replying just now (status ${res.status}).`);
+        return;
+      }
+      const data = await res.json();
+      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+      addMsg(botReply);
+      // 🔊 Speak the reply
+      speakReply(botReply);
+
+    } catch (err) {
+      console.error("sendToBot error:", err);
+      hideTyping();
+      addMsg("I had trouble replying just now.");
     }
-    const data = await res.json();
-    const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
-    addMsg(botReply);
-
-    // 🔊 Speak the reply using Alloy
-    speakReply(botReply);
-
-  } catch (err) {
-    console.error("sendToBot error:", err);
-    hideTyping();
-    addMsg("I had trouble replying just now.");
   }
-}
 
-// === NEW FUNCTION: Call /voice and play audio ===
-async function speakReply(text) {
-  try {
-    const resp = await fetch(`${apiBase}/voice`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: "alloy" })
-    });
-    if (!resp.ok) {
-      console.error("Voice API error:", resp.status);
-      return;
+  // === NEW FUNCTION: Call /voice and play audio ===
+  async function speakReply(text) {
+    try {
+      const resp = await fetch(`${apiBase}/voice`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice: "alloy" })
+      });
+      if (!resp.ok) {
+        console.error("Voice API error:", resp.status);
+        return;
+      }
+
+      const audioBlob = await resp.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+      audio.play().catch(err => {
+        console.error("Audio playback blocked or failed:", err);
+      });
+    } catch (err) {
+      console.error("Voice playback failed", err);
     }
-
-    // Use blob so any audio type works (mp3, wav, webm, etc.)
-    const audioBlob = await resp.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    const audio = new Audio(audioUrl);
-    audio.play().catch(err => {
-      console.error("Audio playback blocked or failed:", err);
-    });
-  } catch (err) {
-    console.error("Voice playback failed", err);
   }
-}
 
   // === EVENT LISTENERS ===
   function openChat() {
@@ -301,61 +294,61 @@ async function speakReply(text) {
     if (e.key === "Enter") sendBtn.click();
   });
 
- micBtn.onclick = async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    const chunks = [];
+  micBtn.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks = [];
 
-   // 🔴 Add a recording indicator
-micBtn.style.background = "white"; 
-micBtn.style.color = "red"; 
-micBtn.textContent = "🔴"; // change icon while recording
+      // 🔴 Show recording indicator
+      micBtn.style.background = "white";
+      micBtn.style.color = "red";
+      micBtn.textContent = "🔴";
 
-mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
-mediaRecorder.onstop = async () => {
-  // reset button style
-  micBtn.style.background = "#1abc9c";
-  micBtn.style.color = "white";
-  micBtn.textContent = "🎤";
+      mediaRecorder.onstop = async () => {
+        // reset button style
+        micBtn.style.background = "#1abc9c";
+        micBtn.style.color = "white";
+        micBtn.textContent = "🎤";
 
-  const blob = new Blob(chunks, { type: "audio/webm" });
-  const formData = new FormData();
-  formData.append("file", blob, "speech.webm");
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("file", blob, "speech.webm");
 
-  try {
-    const resp = await fetch(`${apiBase}/stt`, {
-      method: "POST",
-      body: formData
-    });
+        try {
+          const resp = await fetch(`${apiBase}/stt`, {
+            method: "POST",
+            body: formData
+          });
 
-    if (!resp.ok) {
-      addMsg("🎤 Speech‑to‑text failed.", "bot");
-      return;
+          if (!resp.ok) {
+            addMsg("🎤 Speech‑to‑text failed.", "bot");
+            return;
+          }
+
+          const data = await resp.json();
+          const transcript = data.text;
+
+          if (transcript && transcript.trim() !== "") {
+            sendToBot(transcript); // ✅ goes through same flow as typed input
+          } else {
+            addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
+          }
+        } catch (err) {
+          addMsg("🎤 STT error: " + err.message, "bot");
+        }
+      };
+
+      mediaRecorder.start();
+      addMsg("🎤 Listening...", "bot");
+
+      setTimeout(() => mediaRecorder.stop(), 5000);
+    } catch (err) {
+      addMsg("🎤 Microphone error: " + err.message, "bot");
     }
-
-    const data = await resp.json();
-    const transcript = data.text;
-
-    if (transcript && transcript.trim() !== "") {
-      // ✅ Only call sendToBot — it will add the user message and trigger voice
-      sendToBot(transcript);
-    } else {
-      addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
-    }
-  } catch (err) {
-    addMsg("🎤 STT error: " + err.message, "bot");
-  }
-};
-
-mediaRecorder.start();
-addMsg("🎤 Listening...", "bot");
-
-setTimeout(() => mediaRecorder.stop(), 5000);
-} catch (err) {
-  addMsg("🎤 Microphone error: " + err.message, "bot");
-}
-};
+  };
 })();
 
+      
