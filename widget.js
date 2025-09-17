@@ -225,30 +225,56 @@
     }
   }
 
-  // === BOT COMMUNICATION ===
-  async function sendToBot(message) {
-    addMsg(message, "user");
-    input.value = "";
-    showTyping();
-    try {
-      const res = await fetch(`${apiBase}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId, message })
-      });
-      hideTyping();
-      if (!res.ok) {
-        addMsg(`I had trouble replying just now (status ${res.status}).`);
-        return;
-      }
-      const data = await res.json();
-      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
-      addMsg(botReply);
-    } catch {
-      hideTyping();
-      addMsg("I had trouble replying just now.");
+ // === BOT COMMUNICATION ===
+async function sendToBot(message) {
+  addMsg(message, "user");
+  input.value = "";
+  showTyping();
+  try {
+    const res = await fetch(`${apiBase}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId, message })
+    });
+    hideTyping();
+    if (!res.ok) {
+      addMsg(`I had trouble replying just now (status ${res.status}).`);
+      return;
     }
+    const data = await res.json();
+    const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+    addMsg(botReply);
+
+    // 🔊 NEW: speak the reply using Alloy
+    speakReply(botReply);
+
+  } catch {
+    hideTyping();
+    addMsg("I had trouble replying just now.");
   }
+}
+
+// === NEW FUNCTION: Call /voice and play audio ===
+async function speakReply(text) {
+  try {
+    const resp = await fetch(`${apiBase}/voice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: "alloy" })
+    });
+    if (!resp.ok) return;
+
+    const audioData = await resp.arrayBuffer();
+    const audioBlob = new Blob([audioData], { type: "audio/mpeg" });
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    const audio = new Audio(audioUrl);
+    audio.play();
+  } catch (err) {
+    console.error("Voice playback failed", err);
+  }
+}
+
 
   // === EVENT LISTENERS ===
   function openChat() {
