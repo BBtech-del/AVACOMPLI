@@ -296,7 +296,37 @@ async function speakReply(text) {
     if (e.key === "Enter") sendBtn.click();
   });
 
-  micBtn.onclick = () => {
-    addMsg("🎤 Voice input not yet available — coming soon!", "bot");
-  };
-})(); // close IIFE
+  micBtn.onclick = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", blob, "speech.webm");
+
+      const resp = await fetch(`${apiBase}/stt`, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await resp.json();
+      const transcript = data.text;
+      addMsg("🎤 " + transcript, "user");
+      sendToBot(transcript);
+    };
+
+    mediaRecorder.start();
+    addMsg("🎤 Listening... tap again to stop.", "bot");
+
+    // Stop after 5 seconds or on second tap
+    setTimeout(() => mediaRecorder.stop(), 5000);
+
+  } catch (err) {
+    addMsg("🎤 Microphone error: " + err.message, "bot");
+  }
+};
