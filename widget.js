@@ -302,40 +302,48 @@ async function speakReply(text) {
     const mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
 
+    micBtn.onclick = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
     // 🔴 Change button style to show recording
-    micBtn.style.background = "red";
-    micBtn.textContent = "⏺️"; // record icon
+micBtn.style.background = "white";
+micBtn.style.color = "red";
+micBtn.textContent = "🔴"; // record icon
 
-    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
-    mediaRecorder.onstop = async () => {
-      // ✅ Reset button style
-      micBtn.style.background = "#1abc9c";
-      micBtn.textContent = "🎤";
+mediaRecorder.onstop = async () => {
+  // ✅ Reset button style
+  micBtn.style.background = "#1abc9c";
+  micBtn.style.color = "white";
+  micBtn.textContent = "🎤";
 
-      const blob = new Blob(chunks, { type: "audio/webm" });
-      const formData = new FormData();
-      formData.append("file", blob, "speech.webm");
+  const blob = new Blob(chunks, { type: "audio/webm" });
+  const formData = new FormData();
+  formData.append("file", blob, "speech.webm");
 
-      const resp = await fetch(`${apiBase}/stt`, {
-        method: "POST",
-        body: formData
-      });
+  const resp = await fetch(`${apiBase}/stt`, {
+    method: "POST",
+    body: formData
+  });
 
-      const data = await resp.json();
-      const transcript = data.text;
-      addMsg("🎤 " + transcript, "user");
-      sendToBot(transcript);
-    };
+  const data = await resp.json();
+  const transcript = data.text;
+  addMsg("🎤 " + transcript, "user");
+  sendToBot(transcript);
+};
 
-    mediaRecorder.start();
-    addMsg("🎤 Listening...", "bot");
+mediaRecorder.start();
+addMsg("🎤 Listening...", "bot");
 
-    // Stop after 5 seconds
-    setTimeout(() => mediaRecorder.stop(), 5000);
-  } catch (err) {
-    addMsg("🎤 Microphone error: " + err.message, "bot");
-  }
+// Stop after 5 seconds
+setTimeout(() => mediaRecorder.stop(), 5000);
+} catch (err) {
+  addMsg("🎤 Microphone error: " + err.message, "bot");
+}
 };
 })();
 
