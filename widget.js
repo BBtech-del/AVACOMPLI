@@ -324,10 +324,8 @@ mediaRecorder.onstop = async () => {
     body: formData
   });
 
-  const data = await resp.json();
   const transcript = data.text;
-  addMsg("🎤 " + transcript, "user");
-  sendToBot(transcript);
+sendToBot(transcript);
 };
 
 mediaRecorder.start();
