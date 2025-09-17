@@ -302,9 +302,17 @@ async function speakReply(text) {
     const mediaRecorder = new MediaRecorder(stream);
     const chunks = [];
 
-    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    // 🔴 Change button style to show recording
+    micBtn.style.background = "red";
+    micBtn.textContent = "⏺️"; // record icon
+
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
 
     mediaRecorder.onstop = async () => {
+      // ✅ Reset button style
+      micBtn.style.background = "#1abc9c";
+      micBtn.textContent = "🎤";
+
       const blob = new Blob(chunks, { type: "audio/webm" });
       const formData = new FormData();
       formData.append("file", blob, "speech.webm");
@@ -321,11 +329,10 @@ async function speakReply(text) {
     };
 
     mediaRecorder.start();
-    addMsg("🎤 Listening... tap again to stop.", "bot");
+    addMsg("🎤 Listening...", "bot");
 
-    // Stop after 5 seconds or on second tap
+    // Stop after 5 seconds
     setTimeout(() => mediaRecorder.stop(), 5000);
-
   } catch (err) {
     addMsg("🎤 Microphone error: " + err.message, "bot");
   }
