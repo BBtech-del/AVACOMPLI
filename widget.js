@@ -222,32 +222,40 @@
 
   // === BOT COMMUNICATION ===
   async function sendToBot(message) {
-    addMsg(message, "user");
-    input.value = "";
-    showTyping();
-    try {
-      const res = await fetch(`${apiBase}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId, message })
-      });
-      hideTyping();
-      if (!res.ok) {
-        addMsg(`I had trouble replying just now (status ${res.status}).`);
-        return;
-      }
-      const data = await res.json();
-      const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
-      addMsg(botReply);
-      // 🔊 Speak the reply
-      speakReply(botReply);
+  addMsg(message, "user");
+  input.value = "";
+  showTyping();
 
-    } catch (err) {
-      console.error("sendToBot error:", err);
-      hideTyping();
-      addMsg("I had trouble replying just now.");
+  try {
+    const res = await fetch(`${apiBase}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId, message })
+    });
+
+    hideTyping();
+
+    if (!res.ok) {
+      addMsg(`I had trouble replying just now (status ${res.status}).`);
+      return;
     }
+
+    const data = await res.json();
+    const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+
+    // Show the text reply immediately
+    addMsg(botReply);
+
+    // 🔊 Start fetching the voice in parallel
+    // We don't await here — let it load while the user reads
+    speakReply(botReply);
+
+  } catch (err) {
+    console.error("sendToBot error:", err);
+    hideTyping();
+    addMsg("I had trouble replying just now.");
   }
+}
 
   // === NEW FUNCTION: Call /voice and play audio (with stop + indicator) ===
 let currentAudio = null;
