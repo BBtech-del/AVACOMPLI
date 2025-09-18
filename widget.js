@@ -215,26 +215,32 @@ document.head.appendChild(style);
     return msg;
   }
 
-  // === TYPING INDICATOR ===
-  let typingEl = null;
-  function showTyping() {
-    hideTyping();
-    typingEl = document.createElement("div");
-    typingEl.className = "bb-typing";
-    typingEl.innerHTML = "<span>.</span><span>.</span><span>.</span>";
-    messages.appendChild(typingEl);
-    messages.scrollTop = messages.scrollHeight;
+ // === TYPING INDICATOR ===
+let typingEl = null;
+function showTyping() {
+  hideTyping();
+  typingEl = document.createElement("div");
+  typingEl.className = "bb-typing";
+  typingEl.innerHTML = "<span>.</span><span>.</span><span>.</span>";
+  messages.appendChild(typingEl);
+  messages.scrollTop = messages.scrollHeight;
+}
+function hideTyping() {
+  if (typingEl) {
+    typingEl.remove();
+    typingEl = null;
   }
-  function hideTyping() {
-    if (typingEl) {
-      typingEl.remove();
-      typingEl = null;
-    }
-  }
+}
 
-  async function sendToBot(message) {
+// Store conversation history
+let conversation = [];
+
+async function sendToBot(message) {
   addMsg(message, "user");
   input.value = "";
+
+  // Save user message to conversation history
+  conversation.push({ role: "user", content: message });
 
   // Show typing dots while waiting for text reply
   showTyping();
@@ -243,7 +249,8 @@ document.head.appendChild(style);
     const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId, message })
+      // Send the whole conversation so AVA has context
+      body: JSON.stringify({ clientId, conversation })
     });
 
     hideTyping();
@@ -257,7 +264,10 @@ document.head.appendChild(style);
     const botReply =
       data.reply || data.answer || data.message || "I had trouble replying just now.";
 
-    // Start voice streaming immediately (no wait for typing animation)
+    // Save bot reply to conversation history
+    conversation.push({ role: "assistant", content: botReply });
+
+    // Start voice streaming immediately
     speakReply(botReply);
 
     // Show text reply
