@@ -249,30 +249,63 @@
     }
   }
 
-  // === NEW FUNCTION: Call /voice and play audio ===
-  async function speakReply(text) {
-    try {
-      const resp = await fetch(`${apiBase}/voice`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voice: "alloy" })
-      });
-      if (!resp.ok) {
-        console.error("Voice API error:", resp.status);
-        return;
-      }
+  // === NEW FUNCTION: Call /voice and play audio (with stop + indicator) ===
+let currentAudio = null;
+let speakingIndicator = null;
 
-      const audioBlob = await resp.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
+async function speakReply(text) {
+  try {
+    // Stop any current speech
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
 
-      const audio = new Audio(audioUrl);
-      audio.play().catch(err => {
-        console.error("Audio playback blocked or failed:", err);
-      });
-    } catch (err) {
-      console.error("Voice playback failed", err);
+    // Show "thinking/speaking" indicator
+    speakingIndicator = document.createElement("div");
+    speakingIndicator.textContent = "💭 AVA is preparing to speak...";
+    speakingIndicator.style.fontStyle = "italic";
+    speakingIndicator.style.color = "#555";
+    speakingIndicator.style.margin = "5px 0";
+    messages.appendChild(speakingIndicator);
+    messages.scrollTop = messages.scrollHeight;
+
+    // Fetch the audio
+    const resp = await fetch(`${apiBase}/voice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: "alloy" })
+    });
+
+    // Remove indicator once we have a response
+    if (speakingIndicator) {
+      speakingIndicator.remove();
+      speakingIndicator = null;
+    }
+
+    if (!resp.ok) {
+      console.error("Voice API error:", resp.status);
+      return;
+    }
+
+    const audioBlob = await resp.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    // Play the audio
+    currentAudio = new Audio(audioUrl);
+    currentAudio.play().catch(err => {
+      console.error("Audio playback blocked or failed:", err);
+    });
+
+  } catch (err) {
+    console.error("Voice playback failed", err);
+    if (speakingIndicator) {
+      speakingIndicator.remove();
+      speakingIndicator = null;
     }
   }
+}
 
   // === EVENT LISTENERS ===
   function openChat() {
