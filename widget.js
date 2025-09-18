@@ -222,17 +222,22 @@
 
   // === BOT COMMUNICATION ===
   async function sendToBot(message) {
+  // Show the user's message in the chat
   addMsg(message, "user");
   input.value = "";
+
+  // Show typing indicator while waiting for text reply
   showTyping();
 
   try {
+    // Ask the bot for a text reply
     const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ clientId, message })
     });
 
+    // Remove typing indicator once reply arrives
     hideTyping();
 
     if (!res.ok) {
@@ -240,14 +245,16 @@
       return;
     }
 
+    // Parse the bot's reply
     const data = await res.json();
-    const botReply = data.reply || data.answer || data.message || "I had trouble replying just now.";
+    const botReply =
+      data.reply || data.answer || data.message || "I had trouble replying just now.";
 
     // Show the text reply immediately
     addMsg(botReply);
 
-    // 🔊 Start fetching the voice in parallel
-    // We don't await here — let it load while the user reads
+    // 🔊 Start voice playback in parallel (streaming)
+    // This will show "AVA is preparing to speak..." until audio starts
     speakReply(botReply);
 
   } catch (err) {
@@ -270,7 +277,7 @@ async function speakReply(text) {
       currentAudio = null;
     }
 
-    // Show "thinking/speaking" indicator
+    // Show "AVA is preparing to speak..." indicator
     speakingIndicator = document.createElement("div");
     speakingIndicator.textContent = "💭 AVA is preparing to speak...";
     speakingIndicator.style.fontStyle = "italic";
