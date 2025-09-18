@@ -232,7 +232,7 @@ function hideTyping() {
   }
 }
 
-// Store conversation history
+// Store conversation history in browser memory
 let conversation = [];
 
 async function sendToBot(message) {
@@ -241,6 +241,11 @@ async function sendToBot(message) {
 
   // Save user message to conversation history
   conversation.push({ role: "user", content: message });
+
+  // Keep only the last 20 messages (user + bot combined)
+  if (conversation.length > 20) {
+    conversation = conversation.slice(-20);
+  }
 
   // Show typing dots while waiting for text reply
   showTyping();
@@ -266,6 +271,11 @@ async function sendToBot(message) {
 
     // Save bot reply to conversation history
     conversation.push({ role: "assistant", content: botReply });
+
+    // Keep only the last 20 messages again after bot reply
+    if (conversation.length > 20) {
+      conversation = conversation.slice(-20);
+    }
 
     // Start voice streaming immediately
     speakReply(botReply);
