@@ -257,7 +257,7 @@
   }
 }
 
-  // === NEW FUNCTION: Call /voice and play audio (with stop + indicator) ===
+ // === Streaming speakReply: plays directly from /voice-stream (no full download) ===
 let currentAudio = null;
 let speakingIndicator = null;
 
@@ -279,35 +279,26 @@ async function speakReply(text) {
     messages.appendChild(speakingIndicator);
     messages.scrollTop = messages.scrollHeight;
 
-    // Fetch the audio
-    const resp = await fetch(`${apiBase}/voice`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: "alloy" })
+    // Build streaming URL (encode text, include voice)
+    const url = `${apiBase}/voice-stream?voice=alloy&text=${encodeURIComponent(text)}`;
+
+    // Create audio element and start streaming
+    currentAudio = new Audio();
+    currentAudio.addEventListener("play", () => {
+      if (speakingIndicator) {
+        speakingIndicator.remove();
+        speakingIndicator = null;
+      }
     });
 
-    // Remove indicator once we have a response
-    if (speakingIndicator) {
-      speakingIndicator.remove();
-      speakingIndicator = null;
-    }
+    currentAudio.src = url;
+    currentAudio.autoplay = true;
 
-    if (!resp.ok) {
-      console.error("Voice API error:", resp.status);
-      return;
-    }
-
-    const audioBlob = await resp.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    // Play the audio
-    currentAudio = new Audio(audioUrl);
-    currentAudio.play().catch(err => {
-      console.error("Audio playback blocked or failed:", err);
-    });
+    // Attempt playback immediately
+    await currentAudio.play();
 
   } catch (err) {
-    console.error("Voice playback failed", err);
+    console.error("Streaming playback error:", err);
     if (speakingIndicator) {
       speakingIndicator.remove();
       speakingIndicator = null;
