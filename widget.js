@@ -220,24 +220,20 @@
     }
   }
 
-  // === BOT COMMUNICATION ===
   async function sendToBot(message) {
-  // Show the user's message in the chat
   addMsg(message, "user");
   input.value = "";
 
-  // Show typing indicator while waiting for text reply
+  // Show typing dots while waiting for text reply
   showTyping();
 
   try {
-    // Ask the bot for a text reply
     const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ clientId, message })
     });
 
-    // Remove typing indicator once reply arrives
     hideTyping();
 
     if (!res.ok) {
@@ -245,17 +241,15 @@
       return;
     }
 
-    // Parse the bot's reply
     const data = await res.json();
     const botReply =
       data.reply || data.answer || data.message || "I had trouble replying just now.";
 
-    // Show the text reply immediately
-    addMsg(botReply);
-
-    // 🔊 Start voice playback in parallel (streaming)
-    // This will show "AVA is preparing to speak..." until audio starts
+    // Start voice streaming immediately (no wait for typing animation)
     speakReply(botReply);
+
+    // Show text reply
+    addMsg(botReply);
 
   } catch (err) {
     console.error("sendToBot error:", err);
@@ -286,10 +280,10 @@ async function speakReply(text) {
     messages.appendChild(speakingIndicator);
     messages.scrollTop = messages.scrollHeight;
 
-    // Build streaming URL (encode text, include voice)
+    // Build streaming URL
     const url = `${apiBase}/voice-stream?voice=alloy&text=${encodeURIComponent(text)}`;
 
-    // Create audio element and start streaming
+    // Create audio element and stream
     currentAudio = new Audio();
     currentAudio.addEventListener("play", () => {
       if (speakingIndicator) {
@@ -301,7 +295,6 @@ async function speakReply(text) {
     currentAudio.src = url;
     currentAudio.autoplay = true;
 
-    // Attempt playback immediately
     await currentAudio.play();
 
   } catch (err) {
@@ -334,60 +327,67 @@ async function speakReply(text) {
   });
 
   micBtn.onclick = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      const chunks = [];
-
-      // 🔴 Show recording indicator
-      micBtn.style.background = "white";
-      micBtn.style.color = "red";
-      micBtn.textContent = "🔴";
-
-      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-
-      mediaRecorder.onstop = async () => {
-        // reset button style
-        micBtn.style.background = "#1abc9c";
-        micBtn.style.color = "white";
-        micBtn.textContent = "🎤";
-
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const formData = new FormData();
-        formData.append("file", blob, "speech.webm");
-
-        try {
-          const resp = await fetch(`${apiBase}/stt`, {
-            method: "POST",
-            body: formData
-          });
-
-          if (!resp.ok) {
-            addMsg("🎤 Speech‑to‑text failed.", "bot");
-            return;
-          }
-
-          const data = await resp.json();
-          const transcript = data.text;
-
-          if (transcript && transcript.trim() !== "") {
-            sendToBot(transcript); // ✅ goes through same flow as typed input
-          } else {
-            addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
-          }
-        } catch (err) {
-          addMsg("🎤 STT error: " + err.message, "bot");
-        }
-      };
-
-      mediaRecorder.start();
-      addMsg("🎤 Listening...", "bot");
-
-      setTimeout(() => mediaRecorder.stop(), 5000);
-    } catch (err) {
-      addMsg("🎤 Microphone error: " + err.message, "bot");
+  try {
+    // 🔇 Stop AVA if she's speaking
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
     }
-  };
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    // 🔴 Show recording indicator (unchanged)
+    micBtn.style.background = "white";
+    micBtn.style.color = "red";
+    micBtn.textContent = "🔴";
+
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+
+    mediaRecorder.onstop = async () => {
+      // reset button style
+      micBtn.style.background = "#1abc9c";
+      micBtn.style.color = "white";
+      micBtn.textContent = "🎤";
+
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", blob, "speech.webm");
+
+      try {
+        const resp = await fetch(`${apiBase}/stt`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!resp.ok) {
+          addMsg("🎤 Speech‑to‑text failed.", "bot");
+          return;
+        }
+
+        const data = await resp.json();
+        const transcript = data.text;
+
+        if (transcript && transcript.trim() !== "") {
+          sendToBot(transcript); // ✅ goes through same flow as typed input
+        } else {
+          addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
+        }
+      } catch (err) {
+        addMsg("🎤 STT error: " + err.message, "bot");
+      }
+    };
+
+    mediaRecorder.start();
+    addMsg("🎤 Listening...", "bot");
+
+    setTimeout(() => mediaRecorder.stop(), 5000);
+  } catch (err) {
+    addMsg("🎤 Microphone error: " + err.message, "bot");
+  }
+};
 })();
 
       
