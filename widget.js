@@ -178,7 +178,7 @@ document.head.appendChild(style);
   sendBtn.textContent = "Ask";
   const micBtn = document.createElement("button");
   micBtn.className = "mic";
-  micBtn.innerHTML = "🎤";
+  micBtn.innerHTML = "🎙️";
 
   inputBar.appendChild(input);
   inputBar.appendChild(sendBtn);
@@ -362,7 +362,7 @@ async function speakReply(text) {
       // reset button style
       micBtn.style.background = "#1abc9c";
       micBtn.style.color = "white";
-      micBtn.textContent = "🎤";
+      micBtn.textContent = "🎙️";
 
       const blob = new Blob(chunks, { type: "audio/webm" });
       const formData = new FormData();
@@ -375,7 +375,7 @@ async function speakReply(text) {
         });
 
         if (!resp.ok) {
-          addMsg("🎤 Speech‑to‑text failed.", "bot");
+          addMsg("🎙️ Speech‑to‑text failed.", "bot");
           return;
         }
 
@@ -385,19 +385,19 @@ async function speakReply(text) {
         if (transcript && transcript.trim() !== "") {
           sendToBot(transcript); // ✅ goes through same flow as typed input
         } else {
-          addMsg("🎤 Sorry, I couldn’t understand that.", "bot");
+          addMsg("🎙️ Sorry, I couldn’t understand that.", "bot");
         }
       } catch (err) {
-        addMsg("🎤 STT error: " + err.message, "bot");
+        addMsg("🎙️ STT error: " + err.message, "bot");
       }
     };
 
     mediaRecorder.start();
-    addMsg("🎤 Listening...", "bot");
+    addMsg("🎙️🔴 Listening...", "bot");
 
     setTimeout(() => mediaRecorder.stop(), 5000);
   } catch (err) {
-    addMsg("🎤 Microphone error: " + err.message, "bot");
+    addMsg("🎙️ Microphone error: " + err.message, "bot");
   }
 };
 })();
